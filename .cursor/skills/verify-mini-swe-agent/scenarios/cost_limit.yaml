@@ -1,0 +1,11 @@
+# Each call costs 2.0; run with `-l 3` so the agent must stop with LimitsExceeded after call 2 and never reach call 3.
+model:
+  model_class: deterministic
+  model_name: deterministic
+  outputs:
+    - {role: assistant, content: "call 1", extra: {cost: 2.0, actions: [{command: "echo one >> calls.txt"}]}}
+    - {role: assistant, content: "call 2", extra: {cost: 2.0, actions: [{command: "echo two >> calls.txt"}]}}
+    - {role: assistant, content: "call 3 MUST NOT RUN", extra: {cost: 2.0, actions: [{command: "echo three >> calls.txt"}]}}
+    - {role: assistant, content: "submit", extra: {cost: 0.0, actions: [{command: "echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT"}]}}
+environment:
+  cwd: __WORKDIR__

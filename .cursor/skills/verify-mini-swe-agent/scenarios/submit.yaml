@@ -1,0 +1,13 @@
+# Text-based deterministic model: writes a file, then submits. Expect exit_status=Submitted, submission="verify-ok\n".
+model:
+  model_class: deterministic
+  model_name: deterministic
+  outputs:
+    - role: assistant
+      content: "Step 1: write a proof file."
+      extra: {cost: 0.5, actions: [{command: "echo hello-from-verify > proof.txt && cat proof.txt"}]}
+    - role: assistant
+      content: "Step 2: submit."
+      extra: {cost: 0.5, actions: [{command: "printf 'COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT\nverify-ok\n'"}]}
+environment:
+  cwd: __WORKDIR__

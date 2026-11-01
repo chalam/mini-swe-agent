@@ -1,0 +1,15 @@
+# Tool-call deterministic model (the shape mini.yaml's default litellm model produces). Expect Submitted, role=tool observations.
+model:
+  model_class: minisweagent.models.test_models.DeterministicToolcallModel
+  model_name: deterministic_toolcall
+  outputs:
+    - role: assistant
+      content: "Writing proof via tool call."
+      tool_calls: [{id: call_1, type: function, function: {name: bash, arguments: '{"command": "echo toolcall-ok > proof.txt && cat proof.txt"}'}}]
+      extra: {cost: 0.5, actions: [{command: "echo toolcall-ok > proof.txt && cat proof.txt", tool_call_id: call_1}]}
+    - role: assistant
+      content: null
+      tool_calls: [{id: call_2, type: function, function: {name: bash, arguments: '{"command": "echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT"}'}}]
+      extra: {cost: 0.5, actions: [{command: "echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT", tool_call_id: call_2}]}
+environment:
+  cwd: __WORKDIR__
