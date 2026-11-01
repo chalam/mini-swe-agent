@@ -542,3 +542,56 @@ def test_format_errors_count_against_cost_limit(toolcall_config, reset_global_st
     assert agent.n_calls == 3
     assert agent.cost == 3.0
     assert agent.cost == GLOBAL_MODEL_STATS.cost
+
+
+class _ScriptedCostModel(DeterministicModel):
+    """Replays outputs; one marked `format_error` is billed and then fails to parse, like the real model classes."""
+
+    def query(self, messages, **kwargs):
+        output = self.config.outputs[self.current_index + 1]
+        if not output.get("format_error"):
+            return super().query(messages, **kwargs)
+        self.current_index += 1
+        raise FormatError({"role": "user", "content": "No action found.", "extra": {"cost": output["extra"]["cost"]}})
+
+
+def _step(cost: float) -> dict:
+    return make_output("step", [{"command": "echo step"}], cost=cost)
+
+
+def _billed_format_error(cost: float) -> dict:
+    return {**make_output("garbled", [], cost=cost), "format_error": True}
+
+
+@pytest.mark.parametrize(
+    ("step_limit", "cost_limit", "outputs", "exit_status", "n_calls", "cost"),
+    [
+        (0, 0, [_step(1)] * 3, "Submitted", 4, 3.0),  # 0 disables both limits
+        (2, 0, [_step(1)] * 3, "LimitsExceeded", 2, 2.0),  # step limit is inclusive
+        (3, 0, [_step(1)] * 3, "LimitsExceeded", 3, 3.0),
+        (0, 2, [_step(1)] * 3, "LimitsExceeded", 2, 2.0),  # cost limit is inclusive
+        (0, 2.5, [_step(1)] * 3, "LimitsExceeded", 3, 3.0),
+        (0, 3.5, [_step(1)] * 3, "Submitted", 4, 3.0),
+        (
+            0,
+            2,
+            [_billed_format_error(1)] * 2 + [_step(1)],
+            "LimitsExceeded",
+            2,
+            2.0,
+        ),  # unparseable replies are billed (#915)
+        (0, 0, [_billed_format_error(1), _step(1)], "Submitted", 3, 2.0),
+    ],
+)
+def test_limits_table(step_limit, cost_limit, outputs, exit_status, n_calls, cost):
+    submit = make_output("done", [{"command": "echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT"}], cost=0.0)
+    agent = DefaultAgent(
+        model=_ScriptedCostModel(outputs=outputs + [submit]),
+        env=LocalEnvironment(),
+        system_template="sys",
+        instance_template="{{task}}",
+        step_limit=step_limit,
+        cost_limit=cost_limit,
+    )
+    assert agent.run("limits")["exit_status"] == exit_status
+    assert (agent.n_calls, agent.cost) == (n_calls, cost)

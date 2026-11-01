@@ -39,6 +39,7 @@ def run_mini(tmp_path: Path, scenario: str, *args: str) -> tuple[subprocess.Comp
         ("submit", (), "Submitted", 2, 1.0, ("proof.txt", "hello-from-verify\n")),
         ("toolcall", (), "Submitted", 2, 1.0, ("proof.txt", "toolcall-ok\n")),
         ("cost_limit", ("-l", "3"), "LimitsExceeded", 2, 4.0, ("calls.txt", "one\ntwo\n")),
+        ("cost_limit", ("-l", "4"), "LimitsExceeded", 2, 4.0, ("calls.txt", "one\ntwo\n")),  # cost limit is inclusive
         ("cost_limit", ("-l", "0"), "Submitted", 4, 6.0, ("calls.txt", "one\ntwo\nthree\n")),
         ("cost_limit", ("-l", "0", "-c", "agent.step_limit=1"), "LimitsExceeded", 1, 2.0, ("calls.txt", "one\n")),
         ("cost_limit", ("-c", "agent.cost_limit=0", "-l", "3"), "LimitsExceeded", 2, 4.0, ("calls.txt", "one\ntwo\n")),
