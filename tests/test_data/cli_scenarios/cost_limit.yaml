@@ -7,5 +7,3 @@ model:
     - {role: assistant, content: "call 2", extra: {cost: 2.0, actions: [{command: "echo two >> calls.txt"}]}}
     - {role: assistant, content: "call 3 MUST NOT RUN", extra: {cost: 2.0, actions: [{command: "echo three >> calls.txt"}]}}
     - {role: assistant, content: "submit", extra: {cost: 0.0, actions: [{command: "echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT"}]}}
-environment:
-  cwd: __WORKDIR__

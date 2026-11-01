@@ -24,7 +24,7 @@ Duplication (`prototypes/pstack/duplication.py`):
 
 ## Plan, ordered by leverage
 1. Make the offline verification skill the definition of done: `.cursor/skills/verify-mini-swe-agent`. (Done.)
-2. Add a pytest that runs the real `mini` CLI as a subprocess with the scenario YAMLs (submit, toolcall, cost_limit at `-l 3` and `-l 0`, step_limit). Today the only end-to-end test patches the litellm class, the first-run prompt, and the stdin prompts.
+2. (Done: `tests/run/test_mini_cli_offline.py`.) Add a pytest that runs the real `mini` CLI as a subprocess with the scenario YAMLs (submit, toolcall, cost_limit at `-l 3` and `-l 0`, step_limit). Today the only end-to-end test patches the litellm class, the first-run prompt, and the stdin prompts.
 3. Add a contract test parametrized over `_MODEL_CLASS_MAPPING`. It checks `format_message`, `format_observation_messages`, and `serialize` shapes for each of the 3 message formats. This targets the 40 message-shape fixes.
 4. Add an environment protocol test over every importable `_ENVIRONMENT_MAPPING` class. It checks the `execute()` keys (`output`, `returncode`, `exception_info`) and the `_check_finished` semantics. This targets #747 and #764.
 5. Add a limits table test over (cost_limit, step_limit, per-call cost, parse failure), covering 0 = disabled and the #915 billed-parse-failure case. Add `check_falsy_unset.py` to pre-commit.

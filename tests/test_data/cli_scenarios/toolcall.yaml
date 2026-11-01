@@ -11,5 +11,3 @@ model:
       content: null
       tool_calls: [{id: call_2, type: function, function: {name: bash, arguments: '{"command": "echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT"}'}}]
       extra: {cost: 0.5, actions: [{command: "echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT", tool_call_id: call_2}]}
-environment:
-  cwd: __WORKDIR__

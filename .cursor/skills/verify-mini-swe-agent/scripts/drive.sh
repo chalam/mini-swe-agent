@@ -5,13 +5,13 @@
 set -uo pipefail
 source "$(dirname "$0")/_common.sh"
 scen="$1"; shift
-[ -f "$scen" ] || scen="$SKILL_DIR/scenarios/$scen.yaml"
+[ -f "$scen" ] || scen="$REPO/tests/test_data/cli_scenarios/$scen.yaml"
 [ -f "$scen" ] || { echo "no scenario $scen"; exit 2; }
 name=$(basename "$scen" .yaml)
 scratch=$(mktemp -d "${TMPDIR:-/tmp}/verify-mswea.XXXXXX"); echo "dir $scratch" >> "$STATE_FILE"
 mkdir -p "$scratch/cfg" "$scratch/work"
 ev="$EVIDENCE_ROOT/$(date +%Y%m%d-%H%M%S)-$name"; mkdir -p "$ev"
-sed "s#__WORKDIR__#$scratch/work#g" "$scen" > "$ev/scenario.yaml"
+cp "$scen" "$ev/scenario.yaml"
 cmd=(mini -c mini.yaml -c "$ev/scenario.yaml" -t "verify scenario $name" -y --exit-immediately -o "$ev/run.traj.json" "$@")
 printf '%q ' "${cmd[@]}" > "$ev/cmd.txt"; echo >> "$ev/cmd.txt"
 ( cd "$scratch/work" && offline_env "$scratch" timeout 120 "${cmd[@]}" </dev/null >"$ev/transcript.txt" 2>&1 ); rc=$?

@@ -9,5 +9,3 @@ model:
     - role: assistant
       content: "Step 2: submit."
       extra: {cost: 0.5, actions: [{command: "printf 'COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT\nverify-ok\n'"}]}
-environment:
-  cwd: __WORKDIR__

@@ -35,7 +35,7 @@ It checks four things: the venv entry points exist, `minisweagent` imports from 
 $S/drive.sh <scenario> [extra mini args]
 ```
 
-The scenario is a name from `scenarios/` or a path to your own YAML. It runs:
+The scenario is a name from `tests/test_data/cli_scenarios/` (shared with `tests/run/test_mini_cli_offline.py`) or a path to your own YAML. It runs:
 `mini -c mini.yaml -c <scenario> -t "verify scenario <name>" -y --exit-immediately -o <evidence>/run.traj.json [extra args]`
 
 | Scenario | Command | Must show |
@@ -46,7 +46,7 @@ The scenario is a name from `scenarios/` or a path to your own YAML. It runs:
 | `cost_limit` | `drive.sh cost_limit -l 0` | `0` disables the limit: `Submitted`, `api_calls: 4`, calls.txt has `three` |
 | `submit` | `drive.sh submit -c agent.step_limit=1` | `LimitsExceeded`, `api_calls: 1` |
 
-To write a new scenario, copy one from `scenarios/`. Each `outputs` item is `{role: assistant, content, extra: {cost, actions: [{command}]}}`. Toolcall items also need `tool_calls` plus a matching `tool_call_id` in each action. `__WORKDIR__` is replaced with the scratch workdir. Special actions from `test_models._process_test_actions`: `{command: "/sleep 2"}` sleeps, then that output is skipped and the next one replayed. `/warning msg` logs a warning and does the same. There is also `raise`, but YAML cannot carry an exception object, so use pytest for that.
+To write a new scenario, copy one from `tests/test_data/cli_scenarios/` and add a case to the pytest table. Each `outputs` item is `{role: assistant, content, extra: {cost, actions: [{command}]}}`. Toolcall items also need `tool_calls` plus a matching `tool_call_id` in each action. Commands run in the CLI process cwd (the scratch workdir), so scenarios carry no paths. Special actions from `test_models._process_test_actions`: `{command: "/sleep 2"}` sleeps, then that output is skipped and the next one replayed. `/warning msg` logs a warning and does the same. There is also `raise`, but YAML cannot carry an exception object, so use pytest for that.
 
 Run the TUI against any trajectory:
 
@@ -62,7 +62,7 @@ Tests (offline; provider-key tests self-skip):
 $S/suite.sh [pytest args]
 ```
 
-This runs `pytest -n auto` without the two modules that need optional deps (see Gotchas). Baseline at 04d809ce: **545 passed, 61 skipped, 0 failed**.
+This runs `pytest -n auto` without the two modules that need optional deps (see Gotchas). Expected: **553 passed, 61 skipped, 0 failed** (545 at 04d809ce, plus the 8 CLI tests in `tests/run/test_mini_cli_offline.py`).
 
 ## Evidence
 
